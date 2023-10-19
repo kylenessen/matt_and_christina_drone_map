@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Matt and Christina's Home Drone Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="leaflet/leaflet.css" />
+  <script src="leaflet/leaflet.js"></script>
+  <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+  <script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+
+
+</head>
+<body>
+  <div id="map" style="width: 100%; height: 100vh;"></div>
+  <script>
+    
+    // Create World Topo basemap layer
+    var worldTopoLayer = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19
+    });
+
+    // Create the DEM layer
+    var demLayer = L.tileLayer('./dem/{z}/{x}/{y}.png', {
+        maxZoom: 23,
+        noWrap: true
+      });
+
+    // Create drone map layer
+    var orthoLayer = L.tileLayer('./ortho/{z}/{x}/{y}.png', {
+      maxZoom: 23,
+      noWrap: true
+    });
+
+
+    // Initialize the map with both layers
+    var map = L.map('map', {
+        layers: [worldTopoLayer, demLayer, orthoLayer],
+        minZoom: 15,
+        maxZoom: 23,
+        crs: L.CRS.EPSG3857
+      }).setView([35.32147914677889, -120.82806814472559], 22);
+     
+
+    // Add layer control while keeping world topo as a base layer. Have layers expanded by default.
+    var baseLayers = {
+      "World Topo": worldTopoLayer
+    };
+    var overlays = {
+      "Elevation Map": demLayer,
+      "Drone Map": orthoLayer
+    };
+    L.control.layers(baseLayers, overlays, {collapsed: false}).addTo(map);
+
+    // Add scale bar
+    L.control.scale().addTo(map);
+
+    // Add measure tool
+    var polylineMeasureOptions = {
+        position: 'bottomleft',
+        unitControlTitle: 'Change to feet/meters',
+        primaryLengthUnit: 'feet',
+        secondaryLengthUnit: 'miles',
+        primaryAreaUnit: 'sqfeet',
+        secondaryAreaUnit: 'acres',
+        clearMeasurementsOnStop: true,
+        showBearings: true,
+        bearingTextIn: 'In',
+        bearingTextOut: 'Out',
+        tooltipTextFinish: 'Click to <b>finish line</b><br>',
+        tooltipTextDelete: 'Press SHIFT-key and click to delete point',
+        tooltipTextMove: 'Click and drag to <b>move point</b><br>',
+        tooltipTextResume: 'Press CTRL-key and click to <b>resume line</b>',
+        tooltipTextAdd: 'Press ALT-key and click to add point'
+    };
+    L.control.polylineMeasure(polylineMeasureOptions).addTo(map);
+    
+    
+
+    
+  </script>
+</body>
+</html>
